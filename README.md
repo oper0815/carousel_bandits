@@ -1,3 +1,5 @@
+### This repo is forked by https://github.com/deezer/carousel_bandits
+
 # Carousel Personalization in Music Streaming Apps with Contextual Bandits - RecSys 2020
 
 This repository provides Python code and data to reproduce experiments from the article [Carousel Personalization in Music Streaming Apps with Contextual Bandits](https://arxiv.org/abs/2009.06546.pdf) published in the proceedings of the 14th ACM Conference on Recommender Systems ([RecSys 2020](https://recsys.acm.org/recsys20/) - _Best Short Paper Candidate_).
