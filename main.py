@@ -76,8 +76,8 @@ if __name__ == "__main__":
     n_recos = args.n_recos
     print_every = args.print_every
 
-    user_features = np.array(users_df.drop(["segment"], axis = 1))
-    user_features = np.concatenate([user_features, np.ones((n_users,1))], axis = 1)
+    user_features = np.array(users_df.drop(["segment"], axis = 1)) # segment 제외
+    user_features = np.concatenate([user_features, np.ones((n_users,1))], axis = 1) # feature 맨 뒤에 값 추가
     playlist_features = np.array(playlists_df)
 
     user_segment = np.array(users_df.segment)
@@ -85,6 +85,19 @@ if __name__ == "__main__":
     logger.info("SETTING UP SIMULATION ENVIRONMENT")
     logger.info("for %d users, %d playlists, %d recommendations per carousel \n \n" % (n_users, n_playlists, n_recos))
 
+    
+    ''' 
+    ################# POINT ################
+    1. INPUT
+    - user_features : segment 제외한 user embedding matrix
+    - playlist_features : item embedding matrix
+    - user_segment : user_segmentation value
+    - n_recos : 추천으로 제공되는 item 수
+    2. POLICY
+        1) Random :  
+    ########################################
+    '''
+    
     cont_env = ContextualEnvironment(user_features, playlist_features, user_segment, n_recos)
 
     logger.info("SETTING UP POLICIES")
