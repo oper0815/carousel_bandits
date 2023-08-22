@@ -10,29 +10,29 @@ class ContextualEnvironment():
         self.playlist_features = playlist_features
         self.user_segment = user_segment
         self.n_recos = n_recos
-        self.th_segment_rewards = np.zeros(user_features.shape[0])
-        self.th_rewards = np.zeros(user_features.shape[0])
+        self.th_segment_rewards = np.zeros(user_features.shape[0])  # user_features.shape[0] = the number of users in user_features dataset -> segment reward
+        self.th_rewards = np.zeros(user_features.shape[0])          # user_features.shape[0] = the number of users in user_features dataset -> user reward
         self.compute_optimal_theoretical_rewards()
         self.compute_segment_optimal_theoretical_rewards()
 
     # Computes expected reward for each user given their recommendations
     def compute_theoretical_rewards(self, batch_user_ids, batch_recos):
-        batch_user_features = np.take(self.user_features, batch_user_ids, axis = 0)
-        batch_playlist_features = np.take(self.playlist_features, batch_recos, axis = 0)
-        n_users = len(batch_user_ids)
-        th_reward = np.zeros(n_users)
-        for i in range(n_users):
-            probas = expit(batch_user_features[i].dot(batch_playlist_features[i].T))
-            th_reward[i] = 1 - reduce(lambda x,y : x * y, 1 - probas)
+        batch_user_features = np.take(self.user_features, batch_user_ids, axis = 0)         # batch 안에 있는 user에 대한 user_feature만 추출
+        batch_playlist_features = np.take(self.playlist_features, batch_recos, axis = 0)    # 추천리스트에 있는 item에 대한 feature 추출 > (user 수, 추천 item 수, item feature dim)
+        n_users = len(batch_user_ids)                                                       # batch 내에 있는 유저 수
+        th_reward = np.zeros(n_users)                                                       # zero vector 생성 (user 수)
+        for i in range(n_users):                                                            # user 수 만큼 for 문 수행
+            probas = expit(batch_user_features[i].dot(batch_playlist_features[i].T))        # sigmoid (user 수, dim_feature) x T(item 수 x dim_feature)/ batch_playlist_features[i] : i 번째 사람의 추천 item list에 대한 feature
+            th_reward[i] = 1 - reduce(lambda x,y : x * y, 1 - probas)                       ### 할 차례
         return th_reward
 
     # Computes list of n recommendations with highest expected reward for each user
     def compute_optimal_recos(self, batch_user_ids, n):
-        batch_user_features = np.take(self.user_features, batch_user_ids, axis = 0)
-        n_users = len(batch_user_ids)
-        probas = batch_user_features.dot(self.playlist_features.T)
-        optim = np.argsort(-probas)[:, :n]
-        return optim
+        batch_user_features = np.take(self.user_features, batch_user_ids, axis = 0)     # batch 안에 있는 user에 대한 user_feature만 추출
+        n_users = len(batch_user_ids)                                                   # batch 내에 있는 유저 수
+        probas = batch_user_features.dot(self.playlist_features.T)                      # (user 수 x dim_feature) x T(item 수 x dim_feature) => user x item matrix
+        optim = np.argsort(-probas)[:, :n]                                              # argsort는 작은 것 부터 정렬 -> (-) 표기로 내림차순 -> n개만 추출
+        return optim                                                                    # return : batch user에 대한 top N 추천리스트 ITEM INDEX
 
     # Computes highest expected reward for each user
     def compute_optimal_theoretical_rewards(self):
@@ -40,9 +40,9 @@ class ContextualEnvironment():
         u = 0
         step = 100000
         while u < n_users:
-            users_ids = range(u, min(n_users, u + step))
-            opt_recos = self.compute_optimal_recos(users_ids, self.n_recos)
-            opt_rewards = self.compute_theoretical_rewards(users_ids, opt_recos)
+            users_ids = range(u, min(n_users, u + step))                            # range(0, 100000) / range(100000, 200000) > min 함수는 마지막 배치를 위해
+            opt_recos = self.compute_optimal_recos(users_ids, self.n_recos)         # compute_optimal_recos 수행 (batch user id, 추천 item 수)
+            opt_rewards = self.compute_theoretical_rewards(users_ids, opt_recos)    # compute_theoretical_rewards 수행 (batch user id, 추천 list)
             self.th_rewards[u:min(n_users, u + step)] = opt_rewards
             u += step
         return 

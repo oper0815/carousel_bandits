@@ -89,12 +89,18 @@ if __name__ == "__main__":
     ''' 
     ################# POINT ################
     1. INPUT
-    - user_features : segment 제외한 user embedding matrix
-    - playlist_features : item embedding matrix
-    - user_segment : user_segmentation value
-    - n_recos : 추천으로 제공되는 item 수
-    2. POLICY
+        - user_features : segment 제외한 user embedding matrix
+        - playlist_features : item embedding matrix
+        - user_segment : user_segmentation value
+        - n_recos : 추천으로 제공되는 item 수
+    2. ETC
+        - overall_rewards : policies x rounds (단일 policy라면 element는 round별 reward 합)
+        
+    3. POLICY
         1) Random :  
+    4. SIMULATION
+        - 매 라운드 당 user_id N개 샘플링
+        - 
     ########################################
     '''
     
@@ -119,7 +125,7 @@ if __name__ == "__main__":
     start_time = time.time()
     for i in range(n_rounds):
         # Select batch of n_users_per_round users
-        user_ids = np.random.choice(range(n_users), n_users_per_round)
+        user_ids = np.random.choice(range(n_users), n_users_per_round) # range * 수
         overall_optimal_reward[i] = np.take(cont_env.th_rewards, user_ids).sum()
         # Iterate over all policies
         for j in range(n_policies):
