@@ -95,12 +95,11 @@ if __name__ == "__main__":
         - n_recos : 추천으로 제공되는 item 수
     2. ETC
         - overall_rewards : policies x rounds (단일 policy라면 element는 round별 reward 합)
-        
     3. POLICY
         1) Random :  
-    4. SIMULATION
-        - 매 라운드 당 user_id N개 샘플링
-        - 
+    4. SIMULATION (매 라운드)
+        - user_ids : 전체 유저 중 N명 샘플링
+        - overall_optimal_reward[i] : batch user에 있는 사람들의 reward 합
     ########################################
     '''
     
@@ -110,7 +109,7 @@ if __name__ == "__main__":
     logger.info("Policies to evaluate: %s \n \n" % (args.policies))
 
     policies_name = args.policies.split(",")
-    policies = set_policies(policies_name, user_segment, user_features, n_playlists)
+    policies = set_policies(policies_name, user_segment, user_features, n_playlists)                    # init 수행
     n_policies = len(policies)
     n_users_per_round = args.n_users_per_round
     n_rounds = args.n_rounds
@@ -125,12 +124,12 @@ if __name__ == "__main__":
     start_time = time.time()
     for i in range(n_rounds):
         # Select batch of n_users_per_round users
-        user_ids = np.random.choice(range(n_users), n_users_per_round) # range * 수
-        overall_optimal_reward[i] = np.take(cont_env.th_rewards, user_ids).sum()
+        user_ids = np.random.choice(range(n_users), n_users_per_round)                                  # 전체 유저에서 n_users_per_round 크기 만큼 샘플링 / 중복 유저도 가능한데...?
+        overall_optimal_reward[i] = np.take(cont_env.th_rewards, user_ids).sum()                        # overall_optimal_reward[i] = batch user에 있는 사람들의 reward 합
         # Iterate over all policies
         for j in range(n_policies):
             # Compute n_recos recommendations
-            recos = policies[j].recommend_to_users_batch(user_ids, args.n_recos, args.l_init)
+            recos = policies[j].recommend_to_users_batch(user_ids, args.n_recos, args.l_init)           # user_ids(배치 크기)에 있는 유저에 대한 추천리스트
             # Compute rewards
             rewards = cont_env.simulate_batch_users_reward(batch_user_ids= user_ids, batch_recos=recos)
             # Update policy based on rewards

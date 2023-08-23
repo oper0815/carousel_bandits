@@ -242,26 +242,26 @@ class TSSegmentPolicy(Policy):
 
 # Linear Thompson Sampling strategy for fully personalized contextual bandits, as in [Chapelle and Li, 2011]
 class LinearTSPolicy(Policy):
-    def __init__(self, user_features, n_playlists, bias=0.0, cascade_model=True):
+    def __init__(self, user_features, n_playlists, bias=0.0, cascade_model=True):                       # LinearTSPolicy(user_features, n_playlists, bias = -5.0, cascade_model = True)
         self.user_features = user_features
-        n_dim = user_features.shape[1]
-        self.n_playlists = n_playlists
-        self.models = [OnlineLogisticRegression(1, 1, n_dim, bias, 15) for i in range(n_playlists)]
-        self.m = np.zeros((n_playlists, n_dim))
-        self.m[:, -1] = bias
+        n_dim = user_features.shape[1]                                                                  # user feature dimension : 97
+        self.n_playlists = n_playlists                                                                  # item 수 : 862
+        self.models = [OnlineLogisticRegression(1, 1, n_dim, bias, 15) for i in range(n_playlists)]     # item
+        self.m = np.zeros((n_playlists, n_dim))                                                         # item feature matrix
+        self.m[:, -1] = bias                                                                            # 마지막 feature 를 -5로 임의 지정 (bias ?)
         self.q = np.ones((n_playlists, n_dim))
         self.n_dim = n_dim
         self.cascade_model = cascade_model
 
     def recommend_to_users_batch(self, batch_users, n_recos=12, l_init=3):
-        user_features = np.take(self.user_features, batch_users, axis=0)
+        user_features = np.take(self.user_features, batch_users, axis=0)                                # batch 내 user의 feature 추출
         n_users = len(batch_users)
         recos = np.zeros((n_users, n_recos), dtype=np.int64)
         step = 1
         u = 0
         while u < n_users:
             u_next = min(n_users, u+step)
-            p_features_sampled =(np.random.normal(self.m, 1/np.sqrt(self.q), size= (u_next-u, self.n_playlists, self.n_dim)))
+            p_features_sampled =(np.random.normal(self.m, 1/np.sqrt(self.q), size= (u_next-u, self.n_playlists, self.n_dim)))   ###### 시작
             step_p = p_features_sampled.dot(user_features[u:u_next].T)
             for i in range(u_next - u):
                 recos[u+i] = np.argsort((-step_p[i,:,i]))[:n_recos]
