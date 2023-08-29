@@ -247,7 +247,7 @@ class LinearTSPolicy(Policy):
         n_dim = user_features.shape[1]                                                                  # user feature dimension : 97
         self.n_playlists = n_playlists                                                                  # item 수 : 862
         self.models = [OnlineLogisticRegression(1, 1, n_dim, bias, 15) for i in range(n_playlists)]     # item
-        self.m = np.zeros((n_playlists, n_dim))                                                         # item feature matrix
+        self.m = np.zeros((n_playlists, n_dim))                                                         # (아이템 수, feature dim)
         self.m[:, -1] = bias                                                                            # 마지막 feature 를 -5로 임의 지정 (bias ?)
         self.q = np.ones((n_playlists, n_dim))
         self.n_dim = n_dim
@@ -255,12 +255,12 @@ class LinearTSPolicy(Policy):
 
     def recommend_to_users_batch(self, batch_users, n_recos=12, l_init=3):
         user_features = np.take(self.user_features, batch_users, axis=0)                                # batch 내 user의 feature 추출
-        n_users = len(batch_users)
-        recos = np.zeros((n_users, n_recos), dtype=np.int64)
+        n_users = len(batch_users)                                                                      # batch 내 유저 수
+        recos = np.zeros((n_users, n_recos), dtype=np.int64)                                            # 추천리스트 init 생성
         step = 1
         u = 0
-        while u < n_users:
-            u_next = min(n_users, u+step)
+        while u < n_users:                                                                              # 유저 한명씩 수행
+            u_next = min(n_users, u+step)                                                               # 다음 유저
             p_features_sampled =(np.random.normal(self.m, 1/np.sqrt(self.q), size= (u_next-u, self.n_playlists, self.n_dim)))   ###### 시작
             step_p = p_features_sampled.dot(user_features[u:u_next].T)
             for i in range(u_next - u):
