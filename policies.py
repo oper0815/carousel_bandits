@@ -247,9 +247,9 @@ class LinearTSPolicy(Policy):
         n_dim = user_features.shape[1]                                                                  # user feature dimension : 97
         self.n_playlists = n_playlists                                                                  # item 수 : 862
         self.models = [OnlineLogisticRegression(1, 1, n_dim, bias, 15) for i in range(n_playlists)]     # item
-        self.m = np.zeros((n_playlists, n_dim))                                                         # (아이템 수, feature dim)
+        self.m = np.zeros((n_playlists, n_dim))                                                         # zeros (아이템 수, feature dim)
         self.m[:, -1] = bias                                                                            # 마지막 feature 를 -5로 임의 지정 (bias ?)
-        self.q = np.ones((n_playlists, n_dim))
+        self.q = np.ones((n_playlists, n_dim))                                                          # ones (아이템 수, feature dim)
         self.n_dim = n_dim
         self.cascade_model = cascade_model
 
@@ -261,13 +261,13 @@ class LinearTSPolicy(Policy):
         u = 0
         while u < n_users:                                                                              # 유저 한명씩 수행
             u_next = min(n_users, u+step)                                                               # 다음 유저
-            p_features_sampled =(np.random.normal(self.m, 1/np.sqrt(self.q), size= (u_next-u, self.n_playlists, self.n_dim)))   ###### 시작
-            step_p = p_features_sampled.dot(user_features[u:u_next].T)
+            p_features_sampled =(np.random.normal(self.m, 1/np.sqrt(self.q), size= (u_next-u, self.n_playlists, self.n_dim)))   # 평균 / 표준편차 / size > (1, item 수, dim_feature)
+            step_p = p_features_sampled.dot(user_features[u:u_next].T)                                  # sampled item features * N 번째 유저 feature >> N번째 유저에 대한 선호도 = 추천리스트 
             for i in range(u_next - u):
-                recos[u+i] = np.argsort((-step_p[i,:,i]))[:n_recos]
+                recos[u+i] = np.argsort((-step_p[i,:,i]))[:n_recos]                                     # 선호도 기준 N=12개 추출
             u += step
         # Shuffle l_init first slots
-        np.random.shuffle(recos[0:l_init])
+        np.random.shuffle(recos[0:l_init])                                                              # recos[:,:3] 이 맞지 않나???? 사람별 l_init 까지 리스트 셔플링 ? ###### Qustion
         return recos
 
     def update_policy(self, user_ids, recos , rewards, l_init=3):

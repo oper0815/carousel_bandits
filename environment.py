@@ -16,7 +16,7 @@ class ContextualEnvironment():
         self.compute_segment_optimal_theoretical_rewards()
 
     # Computes expected reward for each user given their recommendations
-    def compute_theoretical_rewards(self, batch_user_ids, batch_recos):
+    def compute_theoretical_rewards(self, batch_user_ids, batch_recos):             # STEP 2-2
         batch_user_features = np.take(self.user_features, batch_user_ids, axis = 0)         # batch 안에 있는 user에 대한 user_feature만 추출 / (9,97)
         batch_playlist_features = np.take(self.playlist_features, batch_recos, axis = 0)    # 추천리스트에 있는 item에 대한 feature 추출 > (user 수, 추천 item 수, item feature dim)
         n_users = len(batch_user_ids)                                                       # batch 내에 있는 유저 수
@@ -27,7 +27,7 @@ class ContextualEnvironment():
         return th_reward
 
     # Computes list of n recommendations with highest expected reward for each user
-    def compute_optimal_recos(self, batch_user_ids, n):
+    def compute_optimal_recos(self, batch_user_ids, n):                             # STEP 2-1
         batch_user_features = np.take(self.user_features, batch_user_ids, axis = 0)     # batch 안에 있는 user에 대한 user_feature만 추출
         n_users = len(batch_user_ids)                                                   # batch 내에 있는 유저 수
         probas = batch_user_features.dot(self.playlist_features.T)                      # (user 수 x dim_feature) x T(item 수 x dim_feature) => user x item matrix
@@ -35,7 +35,7 @@ class ContextualEnvironment():
         return optim                                                                    # return : batch user에 대한 top N 추천리스트 ITEM INDEX
 
     # Computes highest expected reward for each user
-    def compute_optimal_theoretical_rewards(self):
+    def compute_optimal_theoretical_rewards(self):                                  # STEP 1
         n_users = self.user_features.shape[0]
         u = 0
         step = 100000
@@ -77,16 +77,16 @@ class ContextualEnvironment():
     def simulate_batch_users_reward(self, batch_user_ids, batch_recos):
         
         # First, compute probability of streaming each reco and draw rewards accordingly
-        batch_user_features = np.take(self.user_features, batch_user_ids, axis = 0)
-        batch_playlist_features = np.take(self.playlist_features, batch_recos, axis = 0)
-        n_users = len(batch_user_ids)
-        n = len(batch_recos[0])
-        probas = np.zeros((n_users, n))
+        batch_user_features = np.take(self.user_features, batch_user_ids, axis = 0)             # 샘플된 유저의 features
+        batch_playlist_features = np.take(self.playlist_features, batch_recos, axis = 0)        # 유저 추천리스트의 item feature > (20000, 12, 97)
+        n_users = len(batch_user_ids)                                                           # 샘플된 유저 수 (batch_size)
+        n = len(batch_recos[0])                                                                 # 추천리스트 수 (N개 추천)
+        probas = np.zeros((n_users, n))                                                         # matrix of (유저 수, 추천 수)
         for i in range(n_users):
-            probas[i] = expit(batch_user_features[i].dot(batch_playlist_features[i].T)) # probability to stream each reco
-        rewards = np.zeros((n_users, n))
+            probas[i] = expit(batch_user_features[i].dot(batch_playlist_features[i].T)) # probability to stream each reco   # i번째 user 추천리스트의 확률 (선호도)
+        rewards = np.zeros((n_users, n))                                                        # matrix of (유저 수, 추천 수)
         i = 0
-        rewards_uncascaded = np.random.binomial(1, probas) # drawing rewards from probabilities
+        rewards_uncascaded = np.random.binomial(1, probas) # drawing rewards from probabilities ###### 시작
         positive_rewards = set()
 
         # Then, for each user, positive rewards after the first one are set to 0 (and playlists as "unseen" subsequently)
