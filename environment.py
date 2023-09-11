@@ -76,17 +76,17 @@ class ContextualEnvironment():
     # corresponding simulated reward
     def simulate_batch_users_reward(self, batch_user_ids, batch_recos):
         
-        # First, compute probability of streaming each reco and draw rewards accordingly
+        # First, compute probability of streaming each reco and draw rewards accordingly        
         batch_user_features = np.take(self.user_features, batch_user_ids, axis = 0)             # 샘플된 유저의 features
         batch_playlist_features = np.take(self.playlist_features, batch_recos, axis = 0)        # 유저 추천리스트의 item feature > (20000, 12, 97)
         n_users = len(batch_user_ids)                                                           # 샘플된 유저 수 (batch_size)
         n = len(batch_recos[0])                                                                 # 추천리스트 수 (N개 추천)
         probas = np.zeros((n_users, n))                                                         # matrix of (유저 수, 추천 수)
         for i in range(n_users):
-            probas[i] = expit(batch_user_features[i].dot(batch_playlist_features[i].T)) # probability to stream each reco   # i번째 user 추천리스트의 확률 (선호도)
+            probas[i] = expit(batch_user_features[i].dot(batch_playlist_features[i].T)) # probability to stream each reco   # i번째 user 추천리스트의 확률 (선호도) - (1x97)x(97x12)
         rewards = np.zeros((n_users, n))                                                        # matrix of (유저 수, 추천 수)
         i = 0
-        rewards_uncascaded = np.random.binomial(1, probas) # drawing rewards from probabilities ###### 시작
+        rewards_uncascaded = np.random.binomial(1, probas) # drawing rewards from probabilities     # 온라인 환경 재현을 위해 임의로 interact 한 리스트 생성 (추천리스트 중 일부로)
         positive_rewards = set()
 
         # Then, for each user, positive rewards after the first one are set to 0 (and playlists as "unseen" subsequently)
@@ -94,7 +94,7 @@ class ContextualEnvironment():
         # (nonetheless, users can be drawn several times in the batch of a same round ; therefore, each user
         # can have several positive rewards - i.e. stream several playlists - in a same round, consistently with
         # the multiple-plays framework from the paper)
-        nz = rewards_uncascaded.nonzero()
+        nz = rewards_uncascaded.nonzero()                                                       # nonzero인 항목들의 matrix index return
         for i in range(len(nz[0])):
             if nz[0][i] not in positive_rewards:
                 rewards[nz[0][i]][nz[1][i]] = 1

@@ -131,9 +131,9 @@ if __name__ == "__main__":
             # Compute n_recos recommendations
             recos = policies[j].recommend_to_users_batch(user_ids, args.n_recos, args.l_init)           # user_ids(배치 크기)에 있는 유저에 대한 추천리스트 / (20000 x 12)
             # Compute rewards
-            rewards = cont_env.simulate_batch_users_reward(batch_user_ids= user_ids, batch_recos=recos) # Sample 유저에 대한 reward
+            rewards = cont_env.simulate_batch_users_reward(batch_user_ids= user_ids, batch_recos=recos) # Sample 유저에 대한 reward 반환
             # Update policy based on rewards
-            policies[j].update_policy(user_ids, recos, rewards, args.l_init)
+            policies[j].update_policy(user_ids, recos, rewards, args.l_init)                            
             overall_rewards[j,i] = rewards.sum()
         # Print info
         if i == 0 or (i+1) % print_every == 0 or i+1 == n_rounds:

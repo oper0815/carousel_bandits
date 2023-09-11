@@ -10,7 +10,7 @@ import numpy as np
 class OnlineLogisticRegression:
 
     # Initializing
-    def __init__(self, lambda_, alpha, n_dim, bias, maxiter = 15):
+    def __init__(self, lambda_, alpha, n_dim, bias, maxiter = 15):                              # lambda = 1, alpha = 1, n_dim = 97
 
         # Hyperparameter: deviation on the prior (L2 regularizer)
         self.lambda_ = lambda_; self.alpha = alpha; self.maxiter = maxiter
@@ -23,7 +23,7 @@ class OnlineLogisticRegression:
         self.q = np.ones(self.n_dim) * self.lambda_
 
         # Initializing weights
-        self.w = np.random.normal(self.m, self.alpha * (self.q)**(-1.0), size = self.n_dim)
+        self.w = np.random.normal(self.m, self.alpha * (self.q)**(-1.0), size = self.n_dim)     # n_dim 의 weight ?
         
     # Loss function
     def loss(self, w, *args):
