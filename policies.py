@@ -281,13 +281,13 @@ class LinearTSPolicy(Policy):
                 nb_display +=1
                 if p not in modified_playlists:
                     modified_playlists[p] = {"X" : [], "Y" : []}
-                modified_playlists[p]["X"].append(self.user_features[user_ids[i]])                      ###### 시작
-                modified_playlists[p]["Y"].append(r)
+                modified_playlists[p]["X"].append(self.user_features[user_ids[i]])                      # user_features[user_ids[i]] : i번째 유저의 feature
+                modified_playlists[p]["Y"].append(r)                                                    # 반응한 아이템까지의 reward 모음
                 if self.cascade_model and ((total_stream == 0 and nb_display == l_init) or (r == 1)):   # reward가 1 (시청) 이거나 l_init까지 오면 종료 
                     break
         for p,v in modified_playlists.items():                                                          # p : i번째 유저 / v : value
-            X = np.array(v["X"])
-            Y = np.array(v["Y"])
+            X = np.array(v["X"])                                                                        # user_features[user_ids[i]] : i번째 유저의 feature (반응한 아이템까지 만큼 중복)
+            Y = np.array(v["Y"])                                                                        # 반응한 아이템까지의 reward 모음
             self.models[p].fit(X,Y)                                                                     ###### 시작
             self.m[p] = self.models[p].m
             self.q[p] = self.models[p].q
