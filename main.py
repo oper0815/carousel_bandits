@@ -133,7 +133,7 @@ if __name__ == "__main__":
             # Compute rewards
             rewards = cont_env.simulate_batch_users_reward(batch_user_ids= user_ids, batch_recos=recos) # Sample 유저에 대한 reward 반환
             # Update policy based on rewards
-            policies[j].update_policy(user_ids, recos, rewards, args.l_init)                            
+            policies[j].update_policy(user_ids, recos, rewards, args.l_init)                            # reward 기준으로 policy update
             overall_rewards[j,i] = rewards.sum()
         # Print info
         if i == 0 or (i+1) % print_every == 0 or i+1 == n_rounds:

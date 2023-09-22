@@ -288,7 +288,7 @@ class LinearTSPolicy(Policy):
         for p,v in modified_playlists.items():                                                          # p : i번째 유저 / v : value
             X = np.array(v["X"])                                                                        # user_features[user_ids[i]] : i번째 유저의 feature (반응한 아이템까지 만큼 중복)
             Y = np.array(v["Y"])                                                                        # 반응한 아이템까지의 reward 모음
-            self.models[p].fit(X,Y)                                                                     ###### 시작
+            self.models[p].fit(X,Y)                                                                     # 유저마다 fit (online learning)
             self.m[p] = self.models[p].m
             self.q[p] = self.models[p].q
         return
